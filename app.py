@@ -402,6 +402,11 @@ def analyze():
 
         df = pd.read_csv(file)
 
+        if df.empty:
+            return jsonify({
+                "error": "The uploaded CSV contains no data rows."
+            }), 400
+
         missing = [
             column for column in FEATURES
             if column not in df.columns
@@ -424,7 +429,11 @@ def analyze():
 
         return jsonify({
             "rows": len(df),
-            "predictions": counts.to_dict()
+            "predictions": counts.to_dict(),
+            "dataset_name": file.filename or "Uploaded dataset",
+            "required_features": len(FEATURES),
+            "detection_engine": "Random Forest",
+            "anomaly_engine": "Isolation Forest"
         })
 
     except Exception as e:

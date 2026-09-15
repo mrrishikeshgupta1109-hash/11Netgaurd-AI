@@ -611,7 +611,7 @@ $("uploadForm").addEventListener("submit", async function (event) {
             return;
         }
 
-        renderAnalysisReport(result, file.name);
+        renderAnalysisReport(result);
     } catch (error) {
         console.error("Dataset analysis error:", error);
         renderAnalysisError("Unable to analyze dataset. Please try again.");
@@ -622,10 +622,14 @@ $("uploadForm").addEventListener("submit", async function (event) {
     }
 });
 
-function renderAnalysisReport(result, filename) {
+function renderAnalysisReport(result) {
 
     const predictions = result.predictions || {};
     const total = Number(result.rows) || 0;
+    const filename = result.dataset_name || "Uploaded dataset";
+    const requiredFeatures = Number(result.required_features) || 0;
+    const detectionEngine = result.detection_engine || "Detection engine";
+    const anomalyEngine = result.anomaly_engine || "Anomaly engine";
     const categories = Object.entries(predictions)
         .map(([name, count]) => [name, Number(count) || 0])
         .sort((a, b) => b[1] - a[1]);
@@ -697,9 +701,9 @@ function renderAnalysisReport(result, filename) {
                     <dl class="analysis-info">
                         <div><dt>Dataset</dt><dd>${escapeHtml(filename)}</dd></div>
                         <div><dt>Records analyzed</dt><dd>${total.toLocaleString("en-IN")}</dd></div>
-                        <div><dt>Required features</dt><dd>6</dd></div>
-                        <div><dt>Detection engine</dt><dd>Random Forest</dd></div>
-                        <div><dt>Anomaly engine</dt><dd>Isolation Forest</dd></div>
+                        <div><dt>Required features</dt><dd>${requiredFeatures}</dd></div>
+                        <div><dt>Detection engine</dt><dd>${escapeHtml(detectionEngine)}</dd></div>
+                        <div><dt>Anomaly engine</dt><dd>${escapeHtml(anomalyEngine)}</dd></div>
                     </dl>
                 </div>
             </div>
