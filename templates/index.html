@@ -76,11 +76,22 @@
                 <i class="fa-solid fa-microchip"></i>
 
                 <div>
-                    <strong>AI Engine</strong>
-                    <small>Random Forest + Isolation Forest</small>
+                    <strong>AI Detection Engine</strong>
+                    <small>Model services</small>
                 </div>
 
                 <span class="online">ACTIVE</span>
+            </div>
+
+            <div class="engine-status-list" aria-label="AI engine status">
+                <div class="engine-status-row">
+                    <span><i class="fa-solid fa-tree"></i> Random Forest</span>
+                    <small>Classification <b>ACTIVE</b></small>
+                </div>
+                <div class="engine-status-row">
+                    <span><i class="fa-solid fa-radar"></i> Isolation Forest</span>
+                    <small>Anomaly detection <b>ACTIVE</b></small>
+                </div>
             </div>
 
         </div>
@@ -101,16 +112,16 @@
 
             <div class="top-actions">
 
-                <div class="live-badge">
-                    <span></span>
-                    LIVE MONITORING
+                <div class="live-badge" aria-label="Live monitoring active">
+                    <span class="live-indicator"></span>
+                    <span>LIVE MONITORING</span>
                 </div>
 
-                <button id="pauseBtn" class="icon-btn">
+                <button id="pauseBtn" class="icon-btn" aria-label="Pause live monitoring" title="Pause live monitoring">
                     <i class="fa-solid fa-pause"></i>
                 </button>
 
-                <button id="resetBtn" class="icon-btn">
+                <button id="resetBtn" class="icon-btn" aria-label="Reset dashboard" title="Reset dashboard">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
 
@@ -126,19 +137,14 @@
 
                 <div class="hero-content">
 
-                    <div class="tag">
-                        SIH26153
-                    </div>
+                    <div class="tag">SIH26153 <span class="hero-context">/ SECURITY TELEMETRY</span></div>
 
                     <h2>
                         AI-Based Network Attack
                         <span>Forecasting</span>
                     </h2>
 
-                    <p>
-                        Monitor network behavior, detect anomalies and
-                        forecast potential cyber attacks using Artificial Intelligence.
-                    </p>
+                    <p>Monitor network behavior, detect anomalies and forecast potential cyber attacks using Artificial Intelligence.</p>
 
                     <div class="hero-info">
 
@@ -190,6 +196,7 @@
                     </div>
 
                     <small id="riskLevel">Analyzing</small>
+                    <b class="metric-state">LIVE</b>
 
                 </div>
 
@@ -206,6 +213,7 @@
                     </div>
 
                     <small id="confidence">Confidence: --</small>
+                    <b class="metric-state">MODEL</b>
 
                 </div>
 
@@ -222,6 +230,7 @@
                     </div>
 
                     <small>Isolation Forest</small>
+                    <b class="metric-state">LIVE</b>
 
                 </div>
 
@@ -238,6 +247,7 @@
                     </div>
 
                     <small>Real-Time Engine</small>
+                    <b class="metric-state">LIVE</b>
 
                 </div>
 
@@ -360,6 +370,7 @@
                         <div>
                             <span class="section-label">LIVE TELEMETRY</span>
                             <h2>Network Traffic</h2>
+                            <p class="panel-description">Packet-rate activity from the active monitoring stream.</p>
                         </div>
 
                         <span class="live-label">
@@ -381,10 +392,25 @@
                         <div>
                             <span class="section-label">MACHINE LEARNING</span>
                             <h2>AI Forecast</h2>
+                            <p class="panel-description">Current classification and anomaly context.</p>
                         </div>
 
                         <i class="fa-solid fa-brain brain-icon"></i>
 
+                    </div>
+
+                    <div class="threat-distribution" aria-live="polite">
+                        <div class="distribution-heading">
+                            <div>
+                                <span class="section-label">SESSION INSIGHT</span>
+                                <h3>Threat Distribution</h3>
+                            </div>
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div id="threatDistribution" class="distribution-empty">
+                            <i class="fa-solid fa-wave-square"></i>
+                            <span>Waiting for network telemetry</span>
+                        </div>
                     </div>
 
 

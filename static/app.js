@@ -3,6 +3,7 @@ const $ = (id) => document.getElementById(id);
 let paused = false;
 let trafficHistory = [];
 let alertHistory = [];
+let predictionHistory = [];
 
 
 /* =========================
@@ -67,6 +68,8 @@ function updateDashboard(data) {
     updateTraffic(data.traffic);
 
     updateReasons(data.reasons);
+
+    updateThreatDistribution(data.prediction);
 
 }
 
@@ -170,6 +173,60 @@ function updateChart(data) {
 
     drawChart();
 
+}
+
+
+function updateThreatDistribution(prediction) {
+
+    const container = $("threatDistribution");
+
+    if (!container) return;
+
+    if (prediction) {
+        predictionHistory.push(prediction);
+
+        if (predictionHistory.length > 30) {
+            predictionHistory.shift();
+        }
+    }
+
+    if (predictionHistory.length === 0) {
+        container.className = "distribution-empty";
+        container.innerHTML = `
+            <i class="fa-solid fa-wave-square"></i>
+            <span>Waiting for network telemetry</span>
+        `;
+        return;
+    }
+
+    const counts = predictionHistory.reduce((result, category) => {
+        result[category] = (result[category] || 0) + 1;
+        return result;
+    }, {});
+
+    const total = predictionHistory.length;
+    const rows = Object.entries(counts)
+        .sort(([, first], [, second]) => second - first)
+        .map(([category, count]) => {
+            const percentage = count / total * 100;
+            const severity = analysisSeverity(category);
+
+            return `
+                <div class="distribution-row">
+                    <div class="distribution-row-label">
+                        <span><i class="analysis-severity-dot ${severity}"></i>${escapeHtml(category)}</span>
+                        <strong>${percentage.toFixed(0)}%</strong>
+                    </div>
+                    <div class="distribution-row-track">
+                        <span class="distribution-row-fill ${severity}" style="width:${percentage}%"></span>
+                    </div>
+                </div>
+            `;
+        })
+        .join("");
+
+    container.className = "distribution-list";
+    container.innerHTML = rows;
 }
 
 
@@ -439,6 +496,7 @@ $("resetBtn").addEventListener("click", async () => {
 
         trafficHistory = [];
         alertHistory = [];
+        predictionHistory = [];
 
         $("alertCount").textContent = "0";
 
@@ -456,6 +514,7 @@ $("resetBtn").addEventListener("click", async () => {
         $("confidenceBar").style.width = "0%";
 
         renderAlerts();
+        updateThreatDistribution();
 
         drawChart();
 
@@ -500,99 +559,186 @@ $("pauseBtn").addEventListener("click", () => {
    CSV UPLOAD
 ========================= */
 
-$("uploadForm").addEventListener(
-    "submit",
-    async function(event) {
+$("uploadForm").addEventListener("submit", async function (event) {
 
-        event.preventDefault();
+    event.preventDefault();
 
+    const fileInput = $("csvFile");
+    const resultBox = $("uploadResult");
+    const submitButton = this.querySelector("button[type='submit']");
 
-        const fileInput =
-            $("csvFile");
+    if (!fileInput.files.length) {
+        renderAnalysisError("Please select a CSV file.");
+        return;
+    }
 
-        if (!fileInput.files.length) {
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
 
-            $("uploadResult").textContent =
-                "Please select a CSV file.";
+    submitButton.disabled = true;
+    submitButton.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
 
+    resultBox.innerHTML = `
+        <div class="analysis-loading">
+            <i class="fa-solid fa-microchip"></i>
+            <div>
+                <strong>Analyzing network traffic...</strong>
+                <span>Running AI classification...</span>
+            </div>
+        </div>
+    `;
+
+    try {
+        const response = await fetch("/api/analyze", {
+            method: "POST",
+            body: formData
+        });
+
+        let result;
+        try {
+            result = await response.json();
+        } catch {
+            throw new Error("Invalid server response.");
+        }
+
+        if (!response.ok) {
+            renderAnalysisError(
+                result.error || "Dataset analysis failed.",
+                result.missing
+            );
             return;
         }
 
-
-        const formData =
-            new FormData();
-
-        formData.append(
-            "file",
-            fileInput.files[0]
-        );
-
-
-        $("uploadResult").textContent =
-            "Analyzing dataset...";
-
-
-        try {
-
-            const response =
-                await fetch("/api/analyze", {
-
-                    method: "POST",
-
-                    body: formData
-
-                });
-
-
-            const result =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                $("uploadResult").textContent =
-                    result.error || "Analysis failed.";
-
-                return;
-            }
-
-
-            let html = `
-                <strong>
-                    Analysis Complete
-                </strong>
-                <br>
-                Rows analyzed: ${result.rows}
-                <br>
-            `;
-
-
-            Object.entries(result.predictions)
-                .forEach(([name, count]) => {
-
-                    html += `
-                        ${escapeHtml(name)}:
-                        ${count}
-                        <br>
-                    `;
-
-                });
-
-
-            $("uploadResult").innerHTML = html;
-
-
-        } catch (error) {
-
-            $("uploadResult").textContent =
-                "Unable to analyze dataset.";
-
-            console.error(error);
-
-        }
-
+        renderAnalysisReport(result, file.name);
+    } catch (error) {
+        console.error("Dataset analysis error:", error);
+        renderAnalysisError("Unable to analyze dataset. Please try again.");
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML =
+            '<i class="fa-solid fa-magnifying-glass-chart"></i> Analyze Dataset';
     }
-);
+});
+
+function renderAnalysisReport(result, filename) {
+
+    const predictions = result.predictions || {};
+    const total = Number(result.rows) || 0;
+    const categories = Object.entries(predictions)
+        .map(([name, count]) => [name, Number(count) || 0])
+        .sort((a, b) => b[1] - a[1]);
+
+    const normalCount = categories
+        .filter(([name]) => name.toLowerCase() === "normal")
+        .reduce((sum, [, count]) => sum + count, 0);
+    const threatCount = Math.max(total - normalCount, 0);
+    const normalRate = total ? normalCount / total * 100 : 0;
+    const threatRate = total ? threatCount / total * 100 : 0;
+
+    const distribution = categories.map(([name, count]) => {
+        const percentage = total ? count / total * 100 : 0;
+        const severity = analysisSeverity(name);
+
+        return `
+            <div class="analysis-distribution-item">
+                <div class="analysis-distribution-label">
+                    <span><i class="analysis-severity-dot ${severity}"></i>${escapeHtml(name)}</span>
+                    <strong>${percentage.toFixed(1)}%</strong>
+                </div>
+                <div class="analysis-distribution-track">
+                    <div class="analysis-distribution-fill ${severity}" style="width:${percentage}%"></div>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    const breakdown = categories.map(([name, count]) => {
+        const percentage = total ? count / total * 100 : 0;
+        const severity = analysisSeverity(name);
+        const status = name.toLowerCase() === "normal" ? "NORMAL" : severity.toUpperCase();
+
+        return `
+            <tr>
+                <td><span class="analysis-category"><i class="analysis-severity-dot ${severity}"></i>${escapeHtml(name)}</span></td>
+                <td>${count.toLocaleString("en-IN")}</td>
+                <td>${percentage.toFixed(1)}%</td>
+                <td><span class="analysis-status ${severity}">${status}</span></td>
+            </tr>
+        `;
+    }).join("");
+
+    $("uploadResult").innerHTML = `
+        <section class="analysis-report" aria-live="polite">
+            <div class="analysis-report-header">
+                <div>
+                    <span class="analysis-kicker"><i class="fa-solid fa-shield-halved"></i> DATASET ANALYSIS</span>
+                    <h3>Analysis Complete</h3>
+                    <p>${total.toLocaleString("en-IN")} network-flow records analyzed by AI detection engine</p>
+                </div>
+                <span class="analysis-complete">● ANALYSIS COMPLETE</span>
+            </div>
+
+            <div class="analysis-metrics">
+                <div class="analysis-metric-card"><span>TOTAL FLOWS</span><strong>${total.toLocaleString("en-IN")}</strong></div>
+                <div class="analysis-metric-card normal"><span>NORMAL</span><strong>${normalCount.toLocaleString("en-IN")}</strong><small>${normalRate.toFixed(1)}%</small></div>
+                <div class="analysis-metric-card threat"><span>THREATS</span><strong>${threatCount.toLocaleString("en-IN")}</strong><small>${threatRate.toFixed(1)}%</small></div>
+                <div class="analysis-metric-card rate"><span>THREAT RATE</span><strong>${threatRate.toFixed(1)}%</strong></div>
+            </div>
+
+            <div class="analysis-report-grid">
+                <div class="analysis-card">
+                    <div class="analysis-card-title"><div><span class="analysis-kicker">THREAT DISTRIBUTION</span><h4>Prediction categories</h4></div><i class="fa-solid fa-chart-pie"></i></div>
+                    ${distribution || "<p>No predictions returned.</p>"}
+                </div>
+                <div class="analysis-card">
+                    <div class="analysis-card-title"><div><span class="analysis-kicker">DATASET INFORMATION</span><h4>Analysis metadata</h4></div><i class="fa-solid fa-database"></i></div>
+                    <dl class="analysis-info">
+                        <div><dt>Dataset</dt><dd>${escapeHtml(filename)}</dd></div>
+                        <div><dt>Records analyzed</dt><dd>${total.toLocaleString("en-IN")}</dd></div>
+                        <div><dt>Required features</dt><dd>6</dd></div>
+                        <div><dt>Detection engine</dt><dd>Random Forest</dd></div>
+                        <div><dt>Anomaly engine</dt><dd>Isolation Forest</dd></div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="analysis-card analysis-breakdown">
+                <div class="analysis-card-title"><div><span class="analysis-kicker">DETECTION BREAKDOWN</span><h4>Classification results</h4></div><i class="fa-solid fa-table-list"></i></div>
+                <div class="analysis-table-wrapper">
+                    <table class="analysis-table">
+                        <thead><tr><th>Category</th><th>Count</th><th>Percentage</th><th>Status</th></tr></thead>
+                        <tbody>${breakdown}</tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+function renderAnalysisError(message, missing = []) {
+
+    const missingHtml = Array.isArray(missing) && missing.length
+        ? `<div class="analysis-missing"><strong>Missing required features:</strong><ul>${missing.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>`
+        : "";
+
+    $("uploadResult").innerHTML = `
+        <div class="analysis-error" role="alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div><strong>DATASET VALIDATION FAILED</strong><p>${escapeHtml(message)}</p>${missingHtml}</div>
+        </div>
+    `;
+}
+
+function analysisSeverity(name) {
+
+    const category = String(name).toLowerCase();
+    if (category === "normal") return "normal";
+    if (category === "ddos" || category === "botnet") return "critical";
+    if (category === "port scan" || category === "brute force") return "high";
+    return "detected";
+}
 
 
 /* =========================
