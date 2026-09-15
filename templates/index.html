@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NetGuard AI | SOC Dashboard</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <div>
+                <h2>NetGuard AI</h2>
+                <span>SOC PLATFORM</span>
+            </div>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            SYSTEM ONLINE
+        </div>
+
+        <nav>
+
+            <a href="#dashboard" class="active">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </a>
+
+            <a href="#simulation">
+                <i class="fa-solid fa-bug"></i>
+                Attack Simulation
+            </a>
+
+            <a href="#forecast">
+                <i class="fa-solid fa-brain"></i>
+                AI Forecast
+            </a>
+
+            <a href="#threat-alerts">
+                <i class="fa-solid fa-bell"></i>
+                Threat Alerts
+            </a>
+
+            <a href="#dataset">
+                <i class="fa-solid fa-database"></i>
+                Dataset Analysis
+            </a>
+
+            <a href="#architecture">
+                <i class="fa-solid fa-diagram-project"></i>
+                Architecture
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="ai-status">
+                <i class="fa-solid fa-microchip"></i>
+
+                <div>
+                    <strong>AI Engine</strong>
+                    <small>Random Forest + Isolation Forest</small>
+                </div>
+
+                <span class="online">ACTIVE</span>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div>
+                <h1>Security Operations Center</h1>
+                <p>AI-powered Network Attack Forecasting</p>
+            </div>
+
+            <div class="top-actions">
+
+                <div class="live-badge">
+                    <span></span>
+                    LIVE MONITORING
+                </div>
+
+                <button id="pauseBtn" class="icon-btn">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+
+                <button id="resetBtn" class="icon-btn">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="dashboard-section">
+
+            <div class="hero">
+
+                <div class="hero-content">
+
+                    <div class="tag">
+                        SIH26153
+                    </div>
+
+                    <h2>
+                        AI-Based Network Attack
+                        <span>Forecasting</span>
+                    </h2>
+
+                    <p>
+                        Monitor network behavior, detect anomalies and
+                        forecast potential cyber attacks using Artificial Intelligence.
+                    </p>
+
+                    <div class="hero-info">
+
+                        <div>
+                            <i class="fa-solid fa-shield"></i>
+                            Proactive Defense
+                        </div>
+
+                        <div>
+                            <i class="fa-solid fa-bolt"></i>
+                            Real-Time Detection
+                        </div>
+
+                        <div>
+                            <i class="fa-solid fa-brain"></i>
+                            Explainable AI
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="hero-orb">
+
+                    <div class="orb-ring"></div>
+
+                    <div class="orb-core">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- METRICS -->
+
+            <div class="metrics">
+
+                <div class="metric-card">
+
+                    <div class="metric-icon risk">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+
+                    <div>
+                        <span>THREAT RISK</span>
+                        <strong id="riskValue">--</strong>
+                    </div>
+
+                    <small id="riskLevel">Analyzing</small>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-icon prediction">
+                        <i class="fa-solid fa-crosshairs"></i>
+                    </div>
+
+                    <div>
+                        <span>AI PREDICTION</span>
+                        <strong id="prediction">--</strong>
+                    </div>
+
+                    <small id="confidence">Confidence: --</small>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-icon anomaly">
+                        <i class="fa-solid fa-radar"></i>
+                    </div>
+
+                    <div>
+                        <span>ANOMALY STATUS</span>
+                        <strong id="anomaly">--</strong>
+                    </div>
+
+                    <small>Isolation Forest</small>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-icon mode">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+
+                    <div>
+                        <span>MONITORING MODE</span>
+                        <strong id="monitorMode">NORMAL</strong>
+                    </div>
+
+                    <small>Real-Time Engine</small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SIMULATION -->
+
+        <section id="simulation" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">SECURITY LAB</span>
+                    <h2>Attack Simulation</h2>
+                    <p>Test the AI detection engine with simulated network attacks.</p>
+                </div>
+
+            </div>
+
+
+            <div class="simulation-grid">
+
+                <button class="attack-card normal" data-mode="normal">
+
+                    <div class="attack-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+
+                    <div>
+                        <h3>Normal Traffic</h3>
+                        <p>Safe network behavior</p>
+                    </div>
+
+                    <i class="fa-solid fa-play play"></i>
+
+                </button>
+
+
+                <button class="attack-card ddos" data-mode="ddos">
+
+                    <div class="attack-icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+
+                    <div>
+                        <h3>DDoS Attack</h3>
+                        <p>High-volume traffic flood</p>
+                    </div>
+
+                    <i class="fa-solid fa-play play"></i>
+
+                </button>
+
+
+                <button class="attack-card scan" data-mode="scan">
+
+                    <div class="attack-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+
+                    <div>
+                        <h3>Port Scan</h3>
+                        <p>Suspicious port discovery</p>
+                    </div>
+
+                    <i class="fa-solid fa-play play"></i>
+
+                </button>
+
+
+                <button class="attack-card brute" data-mode="bruteforce">
+
+                    <div class="attack-icon">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+
+                    <div>
+                        <h3>Brute Force</h3>
+                        <p>Repeated login attempts</p>
+                    </div>
+
+                    <i class="fa-solid fa-play play"></i>
+
+                </button>
+
+
+                <button class="attack-card botnet" data-mode="botnet">
+
+                    <div class="attack-icon">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+
+                    <div>
+                        <h3>Botnet</h3>
+                        <p>Coordinated malicious traffic</p>
+                    </div>
+
+                    <i class="fa-solid fa-play play"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHART + AI -->
+
+        <section id="forecast" class="section">
+
+            <div class="content-grid">
+
+                <div class="panel chart-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="section-label">LIVE TELEMETRY</span>
+                            <h2>Network Traffic</h2>
+                        </div>
+
+                        <span class="live-label">
+                            <span></span>
+                            LIVE
+                        </span>
+
+                    </div>
+
+                    <canvas id="trafficChart"></canvas>
+
+                </div>
+
+
+                <div class="panel forecast-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="section-label">MACHINE LEARNING</span>
+                            <h2>AI Forecast</h2>
+                        </div>
+
+                        <i class="fa-solid fa-brain brain-icon"></i>
+
+                    </div>
+
+
+                    <div class="forecast-result">
+
+                        <span>DETECTED THREAT</span>
+
+                        <h3 id="forecastPrediction">
+                            Waiting...
+                        </h3>
+
+                        <div class="confidence-bar">
+
+                            <div id="confidenceBar"></div>
+
+                        </div>
+
+                        <p id="forecastConfidence">
+                            AI confidence: --
+                        </p>
+
+                    </div>
+
+
+                    <div class="explain">
+
+                        <h4>
+                            <i class="fa-solid fa-lightbulb"></i>
+                            Explainable AI
+                        </h4>
+
+                        <ul id="reasons">
+                            <li>Waiting for network data...</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TELEMETRY -->
+
+        <section class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">NETWORK TELEMETRY</span>
+                    <h2>Traffic Metrics</h2>
+                </div>
+
+            </div>
+
+
+            <div class="telemetry-grid">
+
+                <div class="telemetry-card">
+
+                    <i class="fa-solid fa-chart-simple"></i>
+
+                    <span>Packet Rate</span>
+
+                    <strong>
+                        <span id="packetRate">--</span>
+                        <small>pps</small>
+                    </strong>
+
+                </div>
+
+
+                <div class="telemetry-card">
+
+                    <i class="fa-solid fa-database"></i>
+
+                    <span>Bandwidth</span>
+
+                    <strong>
+                        <span id="bytesRate">--</span>
+                        <small>B/s</small>
+                    </strong>
+
+                </div>
+
+
+                <div class="telemetry-card">
+
+                    <i class="fa-solid fa-link"></i>
+
+                    <span>Connections</span>
+
+                    <strong>
+                        <span id="connectionRate">--</span>
+                        <small>/sec</small>
+                    </strong>
+
+                </div>
+
+
+                <div class="telemetry-card">
+
+                    <i class="fa-solid fa-circle-xmark"></i>
+
+                    <span>Failed Connections</span>
+
+                    <strong id="failedConnections">--</strong>
+
+                </div>
+
+
+                <div class="telemetry-card">
+
+                    <i class="fa-solid fa-network-wired"></i>
+
+                    <span>Unique Ports</span>
+
+                    <strong id="uniquePorts">--</strong>
+
+                </div>
+
+
+                <div class="telemetry-card">
+
+                    <i class="fa-solid fa-box"></i>
+
+                    <span>Avg Packet Size</span>
+
+                    <strong>
+                        <span id="avgPacketSize">--</span>
+                        <small>bytes</small>
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ALERTS -->
+
+        <section id="threat-alerts" class="section">
+
+            <div class="content-grid">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="section-label">SOC ALERT CENTER</span>
+                            <h2>Threat Alerts</h2>
+                        </div>
+
+                        <span class="alert-count" id="alertCount">0</span>
+
+                    </div>
+
+                    <div id="alertsList" class="alerts-list">
+
+                        <div class="empty-alert">
+                            <i class="fa-solid fa-shield-check"></i>
+                            <p>No threats detected</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel network-health">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="section-label">SYSTEM HEALTH</span>
+                            <h2>Network Health</h2>
+                        </div>
+
+                    </div>
+
+
+                    <div class="health-circle">
+
+                        <div>
+                            <strong id="healthValue">90%</strong>
+                            <span>Healthy</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="health-item">
+                        <span>Network Stability</span>
+                        <strong>Excellent</strong>
+                    </div>
+
+                    <div class="health-item">
+                        <span>AI Engine</span>
+                        <strong>Active</strong>
+                    </div>
+
+                    <div class="health-item">
+                        <span>Monitoring</span>
+                        <strong>Live</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DATASET -->
+
+        <section id="dataset" class="section">
+
+            <div class="panel dataset-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <span class="section-label">DATA ANALYTICS</span>
+                        <h2>Dataset Analysis</h2>
+                        <p>Upload network traffic CSV for AI classification.</p>
+                    </div>
+
+                    <i class="fa-solid fa-file-csv dataset-icon"></i>
+
+                </div>
+
+
+                <form id="uploadForm" class="upload-area">
+
+                    <div class="upload-icon">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+
+                    <h3>Upload Network Traffic Dataset</h3>
+
+                    <p>
+                        Required features:
+                        packet_rate, bytes_rate, connection_rate,
+                        failed_connections, unique_ports, avg_packet_size
+                    </p>
+
+                    <input
+                        type="file"
+                        id="csvFile"
+                        accept=".csv"
+                        required
+                    >
+
+                    <button type="submit" class="upload-btn">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        Analyze Dataset
+                    </button>
+
+                    <div id="uploadResult"></div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- ARCHITECTURE -->
+
+        <section id="architecture" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">SYSTEM DESIGN</span>
+                    <h2>AI Security Architecture</h2>
+                    <p>End-to-end network threat forecasting pipeline.</p>
+                </div>
+
+            </div>
+
+
+            <div class="architecture">
+
+                <div class="architecture-node">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <strong>Network Traffic</strong>
+                    <span>Telemetry</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="architecture-node">
+                    <i class="fa-solid fa-filter"></i>
+                    <strong>Feature Processing</strong>
+                    <span>Normalization</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="architecture-node ai-node">
+                    <i class="fa-solid fa-brain"></i>
+                    <strong>AI Engine</strong>
+                    <span>Random Forest</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="architecture-node">
+                    <i class="fa-solid fa-radar"></i>
+                    <strong>Anomaly Detection</strong>
+                    <span>Isolation Forest</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="architecture-node">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <strong>Early Warning</strong>
+                    <span>SOC Alert</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+
+        <footer>
+
+            <div>
+                <strong>NetGuard AI</strong>
+                <span>SIH26153 Cybersecurity Prototype</span>
+            </div>
+
+            <div>
+                AI-Powered • Real-Time • Explainable
+            </div>
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>
