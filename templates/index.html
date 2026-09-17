@@ -111,12 +111,12 @@
 
             <div class="top-actions">
 
-                <div class="live-badge" aria-label="Live monitoring active">
+                <div class="live-badge" aria-label="Uploaded dataset mode active">
                     <span class="live-indicator"></span>
-                    <span>LIVE MONITORING</span>
+                    <span>DATASET MODE</span>
                 </div>
 
-                <button id="pauseBtn" class="icon-btn" aria-label="Pause live monitoring" title="Pause live monitoring">
+                <button id="pauseBtn" class="icon-btn" aria-label="Pause dataset updates" title="Pause dataset updates">
                     <i class="fa-solid fa-pause"></i>
                 </button>
 
@@ -154,7 +154,7 @@
 
                         <div>
                             <i class="fa-solid fa-bolt"></i>
-                            Real-Time Detection
+                            Dataset Detection
                         </div>
 
                         <div>
@@ -195,7 +195,7 @@
                     </div>
 
                     <small id="riskLevel">Analyzing</small>
-                    <b class="metric-state">LIVE</b>
+                    <b class="metric-state">DATASET</b>
 
                 </div>
 
@@ -229,7 +229,7 @@
                     </div>
 
                     <small>Isolation Forest</small>
-                    <b class="metric-state">LIVE</b>
+                    <b class="metric-state">DATASET</b>
 
                 </div>
 
@@ -245,8 +245,8 @@
                         <strong id="monitorMode">NORMAL</strong>
                     </div>
 
-                    <small>Real-Time Engine</small>
-                    <b class="metric-state">LIVE</b>
+                        <small>Uploaded Dataset Engine</small>
+                    <b class="metric-state">DATASET</b>
 
                 </div>
 
@@ -367,19 +367,63 @@
                     <div class="panel-header">
 
                         <div>
-                            <span class="section-label">LIVE TELEMETRY</span>
-                            <h2>Network Traffic</h2>
-                            <p class="panel-description">Packet-rate activity from the active monitoring stream.</p>
+                            <span class="section-label">DATASET TELEMETRY</span>
+                            <h2>Network Traffic &mdash; Uploaded Dataset</h2>
+                            <p class="panel-description">Source: Uploaded CSV</p>
                         </div>
 
                         <span class="live-label">
                             <span></span>
-                            LIVE
+                            UPLOADED CSV
                         </span>
 
                     </div>
 
-                    <canvas id="trafficChart"></canvas>
+                    <div class="telemetry-kpis" aria-label="Packet rate summary">
+                        <div class="telemetry-kpi"><span>TOTAL RECORDS</span><strong id="packetRecordCount">--</strong></div>
+                        <div class="telemetry-kpi"><span>MIN PACKET RATE</span><strong id="packetRateMin">--</strong><small>pps</small></div>
+                        <div class="telemetry-kpi"><span>MAX PACKET RATE</span><strong id="packetRateMax">--</strong><small>pps</small></div>
+                        <div class="telemetry-kpi"><span>AVERAGE PACKET RATE</span><strong id="packetRateAverage">--</strong><small>pps</small></div>
+                    </div>
+
+                    <div class="traffic-visualization">
+                        <div class="traffic-chart-wrap">
+                            <canvas id="trafficChart" data-feature="packet_rate" aria-label="Packet rate by record number"></canvas>
+                            <div class="chart-axis-labels"><span>Y: packet_rate (pps)</span><span>X: Record Number</span></div>
+                            <div id="trafficTooltip" class="traffic-tooltip" role="status"></div>
+                        </div>
+                        <div class="packet-summary">
+                            <span class="section-label">DATA SUMMARY</span>
+                            <div><span>Total Records</span><strong id="summaryRecordCount">--</strong></div>
+                            <div><span>Min Rate</span><strong id="summaryPacketMin">--</strong></div>
+                            <div><span>Max Rate</span><strong id="summaryPacketMax">--</strong></div>
+                            <div><span>Average Rate</span><strong id="summaryPacketAverage">--</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="data-points">
+                        <div class="data-points-header">
+                            <div>
+                                <span class="section-label">DATA POINTS</span>
+                                <h3>Uploaded CSV Records</h3>
+                            </div>
+                            <button id="viewAllDataBtn" class="data-view-btn" type="button" hidden>View All Data</button>
+                        </div>
+                        <div class="data-table-wrap">
+                            <table class="data-points-table">
+                                <thead><tr><th>Record</th><th>Packet Rate</th><th>Bytes Rate</th><th>Connections</th><th>Failed</th><th>Ports</th><th>Avg Size</th></tr></thead>
+                                <tbody id="dataPointsBody"><tr><td colspan="7">No dataset uploaded. Upload a CSV file to view network traffic analysis.</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="feature-chart-grid">
+                        <div class="feature-chart"><h3>Bytes Rate</h3><canvas data-feature="bytes_rate"></canvas></div>
+                        <div class="feature-chart"><h3>Connection Rate</h3><canvas data-feature="connection_rate"></canvas></div>
+                        <div class="feature-chart"><h3>Failed Connections</h3><canvas data-feature="failed_connections"></canvas></div>
+                        <div class="feature-chart"><h3>Unique Ports</h3><canvas data-feature="unique_ports"></canvas></div>
+                        <div class="feature-chart"><h3>Average Packet Size</h3><canvas data-feature="avg_packet_size"></canvas></div>
+                    </div>
 
                 </div>
 
@@ -598,8 +642,8 @@
                     <div class="health-circle">
 
                         <div>
-                            <strong id="healthValue">90%</strong>
-                            <span>Healthy</span>
+                            <strong id="healthValue">--</strong>
+                            <span id="healthStatus">Awaiting dataset</span>
                         </div>
 
                     </div>
@@ -607,20 +651,22 @@
 
                     <div class="health-item">
                         <span>Network Stability</span>
-                        <strong>Excellent</strong>
+                        <strong id="stabilityValue">Awaiting dataset</strong>
                     </div>
 
                     <div class="health-item">
                         <span>AI Engine</span>
-                        <strong>Active</strong>
+                        <strong id="healthEngineValue">Awaiting dataset</strong>
                     </div>
 
                     <div class="health-item">
                         <span>Monitoring</span>
-                        <strong>Live</strong>
+                        <strong id="healthMonitoringValue">Awaiting dataset</strong>
                     </div>
 
                 </div>
+
+                <p class="health-source">Calculated from uploaded CSV</p>
 
             </div>
 
@@ -751,7 +797,7 @@
             </div>
 
             <div>
-                AI-Powered • Real-Time • Explainable
+                AI-Powered • Dataset-Based • Explainable
             </div>
 
         </footer>

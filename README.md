@@ -76,9 +76,7 @@ Uploaded CSV files must include these columns:
 | --- | --- | --- |
 | `GET` | `/` | Serves the CYBERCAST dashboard. |
 | `GET` | `/api/status` | Returns service status, model names, and supported attack classes. |
-| `GET` | `/api/live` | Generates and returns the current telemetry prediction. |
-| `POST` | `/api/simulate` | Changes the active traffic simulation mode. |
-| `POST` | `/api/reset` | Resets the simulation mode and monitoring history. |
+| `POST` | `/api/reset` | Confirms a dashboard reset; uploaded state is held in the browser. |
 | `POST` | `/api/analyze` | Analyzes an uploaded CSV dataset. |
 
 ## Project Structure

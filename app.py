@@ -3,8 +3,6 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, IsolationForest
 from sklearn.preprocessing import StandardScaler
-import random
-import time
 
 app = Flask(__name__)
 
@@ -30,78 +28,24 @@ ATTACKS = [
 ]
 
 # =========================
-# CREATE SYNTHETIC DATA
+# CREATE TRAINING DATA
 # =========================
 
 def generate_data(n=7000):
-
+    profiles = {
+        "Normal": [300, 50000, 30, 2, 8, 700],
+        "DDoS": [5000, 800000, 500, 20, 15, 400],
+        "Port Scan": [1200, 120000, 250, 80, 200, 200],
+        "Brute Force": [700, 90000, 100, 150, 10, 500],
+        "Botnet": [900, 150000, 120, 40, 30, 300]
+    }
     rows = []
-
-    for _ in range(n):
-
-        attack = random.choices(
-            ATTACKS,
-            weights=[50, 15, 15, 10, 10]
-        )[0]
-
-        if attack == "Normal":
-
-            packet_rate = np.random.normal(300, 80)
-            bytes_rate = np.random.normal(50000, 12000)
-            connection_rate = np.random.normal(30, 8)
-            failed_connections = np.random.normal(2, 1)
-            unique_ports = np.random.normal(8, 3)
-            avg_packet_size = np.random.normal(700, 100)
-
-        elif attack == "DDoS":
-
-            packet_rate = np.random.normal(5000, 1000)
-            bytes_rate = np.random.normal(800000, 150000)
-            connection_rate = np.random.normal(500, 100)
-            failed_connections = np.random.normal(20, 5)
-            unique_ports = np.random.normal(15, 5)
-            avg_packet_size = np.random.normal(400, 80)
-
-        elif attack == "Port Scan":
-
-            packet_rate = np.random.normal(1200, 300)
-            bytes_rate = np.random.normal(120000, 30000)
-            connection_rate = np.random.normal(250, 50)
-            failed_connections = np.random.normal(80, 20)
-            unique_ports = np.random.normal(200, 40)
-            avg_packet_size = np.random.normal(200, 50)
-
-        elif attack == "Brute Force":
-
-            packet_rate = np.random.normal(700, 150)
-            bytes_rate = np.random.normal(90000, 20000)
-            connection_rate = np.random.normal(100, 20)
-            failed_connections = np.random.normal(150, 30)
-            unique_ports = np.random.normal(10, 3)
-            avg_packet_size = np.random.normal(500, 80)
-
-        else:
-
-            packet_rate = np.random.normal(900, 200)
-            bytes_rate = np.random.normal(150000, 30000)
-            connection_rate = np.random.normal(120, 30)
-            failed_connections = np.random.normal(40, 10)
-            unique_ports = np.random.normal(30, 8)
-            avg_packet_size = np.random.normal(300, 70)
-
-        rows.append([
-            max(packet_rate, 1),
-            max(bytes_rate, 1),
-            max(connection_rate, 1),
-            max(failed_connections, 0),
-            max(unique_ports, 1),
-            max(avg_packet_size, 1),
-            attack
-        ])
-
-    columns = FEATURES + ["attack"]
-
-    return pd.DataFrame(rows, columns=columns)
+    for index in range(n):
+        attack = ATTACKS[index % len(ATTACKS)]
+        multiplier = 1 + (index % 11 - 5) / 100
+        values = [max(value * multiplier, 0) for value in profiles[attack]]
+        rows.append([*values, attack])
+    return pd.DataFrame(rows, columns=FEATURES + ["attack"])
 
 
 # =========================
@@ -135,75 +79,6 @@ anomaly_model.fit(X_scaled)
 # =========================
 # GLOBAL STATE
 # =========================
-
-current_mode = "normal"
-
-history = []
-
-
-# =========================
-# SIMULATION DATA
-# =========================
-
-def generate_traffic(mode="normal"):
-
-    if mode == "ddos":
-
-        values = {
-            "packet_rate": random.randint(4000, 6500),
-            "bytes_rate": random.randint(600000, 1000000),
-            "connection_rate": random.randint(400, 700),
-            "failed_connections": random.randint(10, 40),
-            "unique_ports": random.randint(10, 30),
-            "avg_packet_size": random.randint(300, 500)
-        }
-
-    elif mode == "scan":
-
-        values = {
-            "packet_rate": random.randint(800, 1500),
-            "bytes_rate": random.randint(80000, 180000),
-            "connection_rate": random.randint(180, 350),
-            "failed_connections": random.randint(50, 120),
-            "unique_ports": random.randint(150, 300),
-            "avg_packet_size": random.randint(100, 300)
-        }
-
-    elif mode == "bruteforce":
-
-        values = {
-            "packet_rate": random.randint(500, 1000),
-            "bytes_rate": random.randint(60000, 120000),
-            "connection_rate": random.randint(70, 150),
-            "failed_connections": random.randint(100, 200),
-            "unique_ports": random.randint(5, 15),
-            "avg_packet_size": random.randint(400, 600)
-        }
-
-    elif mode == "botnet":
-
-        values = {
-            "packet_rate": random.randint(700, 1200),
-            "bytes_rate": random.randint(100000, 200000),
-            "connection_rate": random.randint(80, 160),
-            "failed_connections": random.randint(20, 60),
-            "unique_ports": random.randint(20, 50),
-            "avg_packet_size": random.randint(200, 400)
-        }
-
-    else:
-
-        values = {
-            "packet_rate": random.randint(150, 450),
-            "bytes_rate": random.randint(25000, 70000),
-            "connection_rate": random.randint(15, 50),
-            "failed_connections": random.randint(0, 5),
-            "unique_ports": random.randint(3, 15),
-            "avg_packet_size": random.randint(500, 900)
-        }
-
-    return values
-
 
 # =========================
 # RISK SCORE
@@ -294,90 +169,11 @@ def status():
 
 
 # =========================
-# LIVE API
-# =========================
-
-@app.route("/api/live")
-def live():
-
-    values = generate_traffic(current_mode)
-
-    df = pd.DataFrame([values])
-
-    scaled = scaler.transform(df[FEATURES])
-
-    prediction = classifier.predict(scaled)[0]
-
-    probabilities = classifier.predict_proba(scaled)[0]
-
-    confidence = round(max(probabilities) * 100, 2)
-
-    anomaly_result = anomaly_model.predict(scaled)[0]
-
-    anomaly = bool(anomaly_result == -1)
-
-    risk = calculate_risk(
-        values,
-        prediction,
-        anomaly
-    )
-
-    reasons = get_reasons(
-        values,
-        prediction
-    )
-
-    result = {
-        "timestamp": time.strftime("%H:%M:%S"),
-        "prediction": prediction,
-        "confidence": confidence,
-        "risk": risk,
-        "anomaly": anomaly,
-        "mode": current_mode,
-        "reasons": reasons,
-        "traffic": values
-    }
-
-    history.append(result)
-
-    if len(history) > 30:
-        history.pop(0)
-
-    return jsonify(result)
-
-
-# =========================
-# SIMULATE ATTACK
-# =========================
-
-@app.route("/api/simulate", methods=["POST"])
-def simulate():
-
-    global current_mode
-
-    data = request.get_json()
-
-    current_mode = data.get("mode", "normal")
-
-    return jsonify({
-        "success": True,
-        "mode": current_mode
-    })
-
-
-# =========================
 # RESET
 # =========================
 
 @app.route("/api/reset", methods=["POST"])
 def reset():
-
-    global current_mode
-
-    current_mode = "normal"
-
-    history.clear()
-
     return jsonify({
         "success": True
     })
@@ -419,17 +215,92 @@ def analyze():
                 "missing": missing
             }), 400
 
-        X_test = df[FEATURES]
-
+        X_test = df[FEATURES].apply(pd.to_numeric, errors="raise")
         scaled = scaler.transform(X_test)
-
         predictions = classifier.predict(scaled)
+        probabilities = classifier.predict_proba(scaled)
+        anomaly_flags = anomaly_model.predict(scaled) == -1
 
-        counts = pd.Series(predictions).value_counts()
+        label_column = next(
+            (column for column in df.columns if column.lower() in {
+                "label", "category", "attack", "class", "classification"
+            }),
+            None
+        )
+        categories = [str(prediction) for prediction in predictions]
+        counts = pd.Series(categories).value_counts()
+        row_data = [
+            {
+                "record": index + 1,
+                **{feature: float(row[feature]) for feature in FEATURES},
+                "prediction": str(prediction),
+                "category": str(category),
+                "confidence": round(float(max(probabilities[index])) * 100, 2),
+                "anomaly": bool(anomaly_flags[index])
+            }
+            for index, (row, prediction, category) in enumerate(
+                zip(df.to_dict("records"), predictions, categories)
+            )
+        ]
+
+        normal_count = sum(
+            str(category).strip().lower() == "normal" for category in categories
+        )
+        threat_count = len(categories) - normal_count
+        threat_rate = threat_count / len(categories) * 100
+        average_confidence = float(np.mean([
+            row["confidence"] for row in row_data
+        ]))
+        anomaly_count = int(anomaly_flags.sum())
+        dominant_category = counts.index[0]
+        failed_record_rate = float((X_test["failed_connections"] > 0).mean() * 100)
+        anomaly_rate = float(anomaly_flags.mean() * 100)
+        health_score = max(0, min(100, 100 - (threat_rate * 0.8)))
+        stability_score = max(0, min(100, 100 - (
+            threat_rate * 0.5
+            + failed_record_rate * 0.3
+            + anomaly_rate * 0.2
+        )))
+        metrics = {
+            feature: float(X_test[feature].mean())
+            for feature in FEATURES
+        }
+        sample_reasons = get_reasons(
+            {feature: float(X_test.iloc[0][feature]) for feature in FEATURES},
+            str(predictions[0])
+        )
 
         return jsonify({
             "rows": len(df),
             "predictions": counts.to_dict(),
+            "features": {
+                feature: [float(value) for value in X_test[feature].tolist()]
+                for feature in FEATURES
+            },
+            "records": row_data,
+            "metrics": metrics,
+            "network_health": {
+                "score": round(health_score, 2),
+                "status": (
+                    "Healthy" if health_score >= 80 else
+                    "Moderate" if health_score >= 60 else
+                    "Warning" if health_score >= 40 else
+                    "Critical"
+                ),
+                "stability": (
+                    "Stable" if stability_score >= 80 else
+                    "Moderate" if stability_score >= 60 else
+                    "Unstable" if stability_score >= 40 else
+                    "Critical"
+                ),
+                "stability_score": round(stability_score, 2)
+            },
+            "label_column": label_column,
+            "dominant_category": str(dominant_category),
+            "confidence": round(average_confidence, 2),
+            "anomaly_count": anomaly_count,
+            "risk": round(threat_rate),
+            "reasons": sample_reasons,
             "dataset_name": file.filename or "Uploaded dataset",
             "required_features": len(FEATURES),
             "detection_engine": "Random Forest",
